@@ -1,0 +1,29 @@
+
+var userLatitude = {{ latitude }};
+var userLongitude = {{ longitude }};
+var record2Latitude = {{ records[2]['위도'] }};
+var record2Longitude = {{ records[2]['경도'] }};
+var record3Latitude = {{ records[3]['위도'] }};
+var record3Longitude = {{ records[3]['경도'] }};
+
+// 중심 좌표를 계산하여 변수에 저장
+var avgLatitude = (userLatitude + record2Latitude + record3Latitude) / 3;
+var avgLongitude = (userLongitude + record2Longitude + record3Longitude) / 3;
+<style>
+        .container {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+        }
+        .record {
+            width: 12%;
+            margin-right: 1%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .record:last-child {
+            margin-right: 0;
+        }
+    </style>

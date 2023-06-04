@@ -1,0 +1,246 @@
+ <!-- CSS -->
+ <link rel="stylesheet" href="{{url_for('static', filename='css/practice_style.css')}}" />
+
+ <!DOCTYPE html>
+ <html>
+ <head>
+     <meta charset="utf-8"> <title>여행일정추천</title>
+     <style> .container { display: flex; flex-wrap: nowrap; justify-content: space-between; }
+     .record { width: 12%; margin-right: 1%; border: 1px solid #ccc; border-radius: 4px; padding: 10px; box-sizing: border-box; }
+     .record:last-child { margin-right: 0; }
+     </style>
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+ </head>
+ <body>
+ <div id="map-container">
+    <div id="map"style="width:100%;height:100%;"></div>
+ </div>
+ <div id="box1" class="box">
+  <div class="content">
+    {% for i in range(5) %}
+        <div class="record">
+            <div class="record-header">
+                 <span>{{i + 2}}. {{ records[i]['상호명'] }}</span>
+            </div>
+            <div class="record-body">
+                <span>유형: {{ records[i]['종류'] }}</span><br>
+                <span>주소: {{ records[i]['주소'] }}</span><br>
+                <span>점수: {{ records[i]['점수'] }}</span><br>
+            </div>
+        </div>
+        {% endfor %}
+  </div>
+</div>
+ <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c708550bc4e904a577296bdeb66788d4"></script>
+ <script>
+$(function() {
+    $("#box1").draggable();
+});
+var userLatitude = {{ latitude }};
+var userLongitude = {{ longitude }};
+var record2Latitude = {{ records[2]['위도'] }};
+var record2Longitude = {{ records[2]['경도'] }};
+var record3Latitude = {{ records[3]['위도'] }};
+var record3Longitude = {{ records[3]['경도'] }};
+
+// 중심 좌표를 계산하여 변수에 저장
+var avgLatitude = (userLatitude + record2Latitude + record3Latitude) / 3;
+var avgLongitude = (userLongitude + record2Longitude + record3Longitude) / 3;
+
+var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+mapOption = {
+    center: new kakao.maps.LatLng(userLatitude, userLongitude), // 지도의 중심좌표
+    level: 6     // 지도의 확대 레벨
+};
+
+// 지도 생성
+var map = new kakao.maps.Map(mapContainer, mapOption);
+// 마커이미지
+var imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png";
+
+// 마커를 표시할 위치와 내용을 가지고 있는 객체 배열입니다
+var positions = [
+{
+    content: '<div>숙소 위치</div>',
+    latlng: new kakao.maps.LatLng({{latitude}}, {{longitude}})
+},
+{
+    content: '<div>'+'{{ records[0]["상호명"] }}'+'</div>',
+    latlng: new kakao.maps.LatLng({{ records[0]['위도'] }},{{ records[0]['경도'] }})
+},
+{
+    content: '<div>'+'{{ records[1]["상호명"] }}'+'</div>',
+    latlng: new kakao.maps.LatLng({{ records[1]['위도'] }},{{ records[1]['경도'] }})
+},
+{
+    content: '<div>'+'{{ records[2]["상호명"] }}'+'</div>',
+    latlng: new kakao.maps.LatLng({{ records[2]['위도'] }},{{ records[2]['경도'] }})
+},
+{
+    content: '<div>'+'{{ records[3]["상호명"] }}'+'</div>',
+    latlng: new kakao.maps.LatLng({{ records[3]['위도'] }},{{ records[3]['경도'] }})
+},
+{
+    content:'<div>'+'{{ records[4]["상호명"] }}'+'</div>',
+    latlng: new kakao.maps.LatLng({{ records[4]['위도'] }},{{ records[4]['경도'] }})
+},
+{
+    content: '<div>'+'{{ records[5]["상호명"] }}'+'</div>',
+    latlng: new kakao.maps.LatLng({{ records[5]['위도'] }},{{ records[5]['경도'] }})
+},
+{
+    content: '<div>'+'{{ records[6]["상호명"] }}'+'</div>',
+    latlng: new kakao.maps.LatLng({{ records[6]['위도'] }},{{ records[6]['경도'] }})
+}
+];
+
+function displayPagination(pagination) {
+    var html = '';
+
+    for (var i = pagination.currentStartIndex; i < pagination.currentEndIndex; i++) {
+        html += '<span class="page-num btn num ' + (i === pagination.currentStartIndex ? 'on' : '') + '" onclick="goPage(' + i + ');">' + (i +1 ) + '</span>';
+    }
+    document.getElementById('pagination').innerHTML = html;
+}
+
+function goPage(page) {
+    var keyword = document.getElementById('keyword').value;
+    var records = JSON.parse(document.getElementById('records').value);
+    var startPosition = page * 4;
+    var endPosition = startPosition + 4;
+    var positions = [];
+
+    if (endPosition > records.length) {
+        endPosition = records.length;
+    }
+
+    for (var i = startPosition; i < endPosition; i++) {
+        positions.push({
+            content: '<div>' + records[i]['상호명'] + '</div>',
+            latlng: new kakao.maps.LatLng(records[i]['위도'], records[i]['경도'])
+        });
+    }
+
+    displayPlaces(positions);
+}
+
+function displayPlaces(positions) {
+    var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+        mapOption = {
+            center: new kakao.maps.LatLng(37.566826, 126.9786567), // 지도의 중심좌표
+            level: 3 // 지도의 확대 레벨
+        };
+
+    var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+
+    // 마커 클러스터러를 생성합니다
+    var clusterer = new kakao.maps.MarkerClusterer({
+        map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
+        averageCenter: true, // 클러스터의 중심좌표를 평균값으로 계산
+        minLevel: 10 // 클러스터 할 최소 지도 레벨
+    });
+
+    // 인포윈도우를 생성합니다
+    var infowindow = new kakao.maps.InfoWindow({zIndex:1});
+
+    for (var i = 0; i < positions.length; i ++) {
+        // 마커를 생성합니다
+        var marker = new kakao.maps.Marker({
+            map: map, // 마커를 표시할 지도 객체
+            position: positions[i].latlng // 마커의 위치
+        });
+
+        // 클러스터러에 마커를 추가합니다
+        clusterer.addMarkers(marker);
+
+        // 마커에 클릭이벤트를 등록합니다
+        kakao.maps.event.addListener(marker, 'click', function(marker, i) {
+            return function() {
+                // 마커 위에 인포윈도우를 표시합니다
+                infowindow.setContent(positions[i].content);
+                infowindow.open(map, marker);
+            }
+        }(marker, i));
+    }
+}
+
+    // 인포윈도우를 표시하는 클로저를 만드는 함수입니다
+function makeOverListener(map, marker, infowindow) {
+    return function() {
+        infowindow.open(map, marker);
+    };
+}
+
+    // 인포윈도우를 닫는 클로저를 만드는 함수입니다
+function makeOutListener(infowindow) {
+    return function() {
+        infowindow.close();
+    };
+}
+
+for (var i = 0; i < positions.length; i ++) {
+
+    var start_pt = (i*46)+10;
+
+    var imageSize = new kakao.maps.Size(36, 37);
+    // 마커를 생성합니다
+    var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize,
+        {spriteSize: new kakao.maps.Size(36, 691),
+         spriteOrigin: new kakao.maps.Point(0, start_pt),
+         offset: new kakao.maps.Point(13, 37)
+         }
+    );
+
+    // 마커를 생성합니다.
+    var marker = new kakao.maps.Marker({
+        map: map,
+        position: positions[i].latlng,
+        title : positions[i].title,
+        image : markerImage
+    });
+
+    // 마커에 표시할 인포윈도우를 생성합니다
+    var infowindow = new kakao.maps.InfoWindow({
+        content: positions[i].content // 인포윈도우에 표시할 내용
+    });
+
+
+    // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
+    // 이벤트 리스너로는 클로저를 만들어 등록합니다
+    // for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
+    kakao.maps.event.addListener(marker, 'mouseover', makeOverListener(map, marker, infowindow));
+    kakao.maps.event.addListener(marker, 'mouseout', makeOutListener(infowindow));
+    }
+    function displayPagination(pagination) {
+        var html = '';
+
+        for (var i = pagination.currentStartIndex; i < pagination.currentEndIndex; i++) {
+            html += '<span class="page-num btn num ' + (i === pagination.currentStartIndex ? 'on' : '') + '" onclick="goPage(' + i + ');">' + (i +1 ) + '</span>';
+    }
+    document.getElementById('pagination').innerHTML = html;
+}
+
+function goPage(page) {
+    var keyword = document.getElementById('keyword').value;
+    var records = JSON.parse(document.getElementById('records').value);
+    var startPosition = page * 4;
+    var endPosition = startPosition + 4;
+    var positions = [];
+
+    if (endPosition > records.length) {
+        endPosition = records.length;
+    }
+
+    for (var i = startPosition; i < endPosition; i++) {
+        positions.push({
+            content: '<div>' + records[i]['상호명'] + '</div>',
+            latlng: new kakao.maps.LatLng(records[i]['위도'], records[i]['경도'])
+        });
+    }
+    displayPlaces(positions);
+}
+</script>
+
+</body>
+ </html>

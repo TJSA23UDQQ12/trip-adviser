@@ -1,0 +1,135 @@
+<!-- CSS -->
+<link rel="stylesheet"  href="{{url_for('static', filename='css/index_style.css')}}" />
+
+<!DOCTYPE>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible"
+    content="IE=edge" />
+    <title>Travel Helper</title>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=c708550bc4e904a577296bdeb66788d4&libraries=services"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sunflower:wght@300&display=swap" rel="stylesheet">
+</head>
+
+<body>
+<div class="center">
+ 	<div class="content">
+        <h1>Travel Helper</h1>
+        </br>
+    </div>
+</div>
+    <img src="https://cdn-icons-png.flaticon.com/128/7289/7289606.png" onclick="openPostcode()" style="cursor:pointer;" class="search-btn">
+    <div id="result"></div>
+    <script>
+	  function openPostcode() {
+	    new daum.Postcode({
+		  oncomplete: function(data) {
+		    // 선택한 주소에서 우편번호와 주소 정보를 가져옵니다.
+		    var fullAddress = data.address;
+
+		    // 주소-좌표 변환 객체를 생성합니다
+		    var geocoder = new daum.maps.services.Geocoder();
+
+		    // 주소로 좌표를 검색합니다.
+		    geocoder.addressSearch(fullAddress, function(result, status) {
+		  	  if (status === daum.maps.services.Status.OK) {
+			    var latitude = result[0].y;
+			    var longitude = result[0].x;
+            // 여행일 수 선택 여부를 확인합니다.
+            var selectedValue = $(".drop-down-option.selected").attr("data-value");
+            if (selectedValue === undefined) {
+              alert("여행일 수를 선택하세요.");
+            } else {
+              window.location.href = "/practice?latitude=" + latitude + "&longitude=" + longitude + "&days=" + selectedValue;
+            }
+          } else {
+            alert("주소가 정확하지 않습니다.");
+          }
+                        });
+		  }
+	    }).open();
+	  }
+    </script>
+<div class="wrapper">
+    <div class="drop-down">
+      <div class="selected"><a href="#"><span>Select your days</span></a></div>
+      <div class="options">
+        <ul class="dropdown-list">
+          <li><a href="#" class="drop-down-option" data-value=1>1일</a></li>
+          <li><a href="#" class="drop-down-option" data-value=2>2일</a></li>
+          <li><a href="#" class="drop-down-option" data-value=3>3일</a></li>
+          <li><a href="#" class="drop-down-option" data-value=4>4일</a></li>
+          <li><a href="#" class="drop-down-option" data-value=5>5일</a></li>
+          <li><a href="#" class="drop-down-option" data-value=6>6일</a></li>
+          <li><a href="#" class="drop-down-option" data-value=7>7일</a></li>
+          <li><a href="#" class="drop-down-option" data-value=8>8일</a></li>
+          <li><a href="#" class="drop-down-option" data-value=9>9일</a></li>
+          <li><a href="#" class="drop-down-option" data-value=10>10일</a></li>
+        </ul>
+      </div>
+    </div>
+</div>
+<script>
+        // SHOW/HIDE DROPDOWN OPTIONS
+        $(".drop-down .selected a").click(function() {
+            $(".drop-down .options ul").toggle();
+        });
+
+        // SELECT OPTIONS AND HIDE DROPDOWN OPTIONS AFTER SELECTION
+        $(".drop-down .options ul li a").click(function() {
+            // 옵션 선택을 확인하고, 선택된 옵션에 대한 정보를 저장합니다.
+            $(".drop-down-option.selected").removeClass("selected");
+            $(this).parent().addClass("selected");
+
+            var text = $(this).html();
+            $(".drop-down .selected a span").html(text);
+            $(".drop-down .options ul").hide();
+
+            var selectedValue = $(this).attr("data-value");
+            $(".drop-down-option[data-value='" + selectedValue + "']").addClass("selected");
+        });
+
+        // HIDE DROPDOWN OPTIONS IF CLICKED ANYWHERE ELSE ON PAGE
+        $(document).bind('click', function(e) {
+            var $clicked = $(e.target);
+            if (!$clicked.parents().hasClass("drop-down"))
+                $(".drop-down .options ul").hide();
+        });
+
+        // HANDLE CLICK EVENT FOR POSTAL CODE SEARCH BUTTON
+        function openPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    // 선택한 주소에서 우편번호와 주소 정보를 가져옵니다.
+                    var fullAddress = data.address;
+
+                    // 주소-좌표 변환 객체를 생성합니다
+                    var geocoder = new daum.maps.services.Geocoder();
+
+                    // 주소로 좌표를 검색합니다.
+                    geocoder.addressSearch(fullAddress, function(result, status) {
+                        if (status === daum.maps.services.Status.OK) {
+                            var latitude = result[0].y;
+                            var longitude = result[0].x;
+
+                            // 여행일 수 선택 여부를 확인합니다.
+                            var selectedValue = $(".drop-down-option.selected").attr("data-value");
+                            if (selectedValue === undefined) {
+                                alert("여행일 수를 선택하세요.");
+                            } else {
+                                window.location.href = "/practice?latitude=" + latitude + "&longitude=" + longitude + "&days=" + selectedValue;
+                            }
+                        } else {
+                            alert("주소가 정확하지 않습니다.");
+                        }
+                    });
+                }
+            }).open();
+        }
+    </script>
+</body>

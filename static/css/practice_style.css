@@ -1,0 +1,68 @@
+body {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+#map-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#map {
+  position: absolute;
+  z-index: 0;
+}
+
+
+.box {
+  width: 25%;
+  height: 70%;
+  left: 69%;
+  top: 6%;
+  position: absolute;
+  border-radius: 5px;
+  box-shadow: 0 0 11px rgba(33,33,33,0);
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 20px;
+
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  transition: box-shadow 0.3s ease;
+}
+
+.box:hover {
+ box-shadow: 0 20px 30px rgba(0, 0, 0, 0.6);
+ background-color: rgba(255, 255, 255, 0.7);
+}
+
+
+.record {
+  margin: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  border: none;
+}
+
+.record-header {
+font-size: 18px;
+font-weight: bold;
+margin-bottom: 10px;
+color: black;
+}
+
+.record-header span {
+  width: auto; /* 수정: span의 너비 지정 */
+  white-space: nowrap; /* 추가: 단어를 분리하지 않고 한 줄에 표시 */
+  padding-right: 5px;
+  margin-right: 5px; /* 추가: span 사이의 간격 */
+}
+
+.record-body span {
+  width: auto; /* 수정: span의 너비 지정 */
+  white-space: nowrap; /* 추가: 단어를 분리하지 않고 한 줄에 표시 */
+  padding-right: 5px;
+  margin-right: 5px; /* 추가: span 사이의 간격 */
+}
